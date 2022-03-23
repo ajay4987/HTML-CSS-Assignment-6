@@ -6,13 +6,36 @@
 	<meta http-equiv="Pragma" content="no-cache" />
 	<meta http-equiv="Expires" content="0" />
 	<script src="bundle.js" type="text/javascript"></script>
+	<link rel="stylesheet" href="assignment6.css">
 </head>
 
 <body>
 	<div id="container">
 
 	<!-- Start your code from here -->
-
+	<main>
+		<form class="form">
+		  <div class="info">
+			<p><strong>Characters:</strong> <span class="count">00</span></p>
+			<p><strong>Threads:</strong> <span class="threadCount">00</span></p>
+		  </div>
+		  <textarea class="textarea" placeholder="The character limit for each tweet is 275" required="" wrap="soft" onkeyup="textInfo(this);"></textarea>
+		  <button type="submit" class="btn">
+			Thread
+		  </button>
+		</form>
+	  
+		<div class="thread-box">
+		  
+		  <div class="thread">
+			<p>
+			  <span class="sl"></span> <br />
+			  Your threads will be here.  <br /><br />
+			  The character limit for each tweet is 275. <br /><br />
+			</p>
+		  </div>
+		</div>
+	  </main>	
 
 	<!-- End your code -->
 
@@ -20,7 +43,125 @@
 
 	<script type="text/javascript">
 	// write your javascript code here
+	//const dom = (s) => document.querySelector(s); 
+	const form = document.querySelector(".form")
+	const strCount = document.querySelector(".count");
+	const threadCount = document.querySelector(".threadCount");
+	const threadBox = document.querySelector(".thread-box");
 
+	let size = 275; 
+	let tweetsArr = [];
+
+	function textInfo(obj) {
+		let length = obj.value.length;
+
+		strCount.innerHTML = length;
+		threadCount.innerHTML = Math.ceil(length / size);
+
+		length > size
+		? (obj.style.color = "dark black"): (obj.style.color = "seagreen");
+	}
+
+	function displayUI(listParent, arr = []) {
+		listParent.innerHTML = arr
+		.map((el, i) => {
+			return `
+			<article class="thread" data-index="${i}">
+
+			<div class="tools">
+			<span class="index">${i < 9 ? '0' + (i + 1): i + 1}</span>
+			<span class="close" data-index="${i}">✖️</span>
+			</div>
+
+			<p class="tweet">
+			${el}
+			</p>
+
+			</article>
+			`;
+		})
+		.join("");
+	}
+
+	function tweets(str) {
+
+		let splitOnWhiteSpace = str.split(' ');
+
+		let result = [];
+
+		let totalLength = 0;
+		let sentence = '';
+
+		for (let i = 0; i < splitOnWhiteSpace.length; i++) {
+
+			let curWord = splitOnWhiteSpace[i];
+			let curWordLength = curWord.length;
+
+			sentence += curWord + ' '; 
+			totalLength += curWordLength + 1;
+
+			if (totalLength >= size) {
+
+				sentence = sentence.trim();
+
+				let lengthDiff = sentence.length - size;
+
+				if (lengthDiff > 0) {
+
+					
+					let lastIndexOfWhiteSpace = sentence.lastIndexOf(' ');
+
+					
+					sentence = sentence.slice(0, lastIndexOfWhiteSpace);
+
+					
+					i--;
+				}
+				result.push(sentence);
+
+				totalLength = 0;
+				sentence = '';
+			}
+
+			if (i === splitOnWhiteSpace.length -1 && totalLength <= size && sentence !== '') {
+				result.push(sentence.trim());
+			}
+		}
+
+		return result;
+
+	}
+
+
+	function thread(e) {
+		e.preventDefault();
+
+		const thread = document.querySelector(".thread");
+		tweetsArr = tweets(document.querySelector(".textarea").value);
+
+		displayUI(threadBox, tweetsArr);
+	}
+
+
+	form.addEventListener("submit", thread);
+
+	function deleteThread(e) {
+		const [el,
+			index] = [e.target,
+			e.target.dataset.index];
+		let txt = e.target.dataset.para;
+
+		if (el.classList.contains("close")) {
+			tweetsArr.splice(index, 1);
+
+			displayUI(threadBox, tweetsArr);
+		}
+
+		if (el.classList.contains("copy")) {
+		}
+	}
+
+	threadBox.addEventListener("click", deleteThread);	
 	</script>
 
 </body>
